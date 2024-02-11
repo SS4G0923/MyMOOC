@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.mymooc</groupId>
-		<artifactId>mymooc-parent</artifactId>
+		<artifactId>MyMOOC-parent</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 		<relativePath>../MyMOOC-parent</relativePath> <!-- lookup parent from repository -->
 	</parent>

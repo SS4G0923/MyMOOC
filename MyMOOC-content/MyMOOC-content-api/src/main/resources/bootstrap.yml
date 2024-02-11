@@ -14,3 +14,10 @@ spring:
 # 日志文件配置路径
 logging:
   config: classpath:log4j2-dev.xml
+
+swagger:
+  title: "MyMOOC"
+  description: "MyMOOC Content"
+  base-package: com.mymooc.content
+  enabled: true
+  version: 1.0.0

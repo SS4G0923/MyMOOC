@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>com.mymooc</groupId>
-        <artifactId>mymooc-parent</artifactId>
+        <artifactId>MyMOOC-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
         <relativePath>../MyMOOC-parent</relativePath> <!-- lookup parent from repository -->
     </parent>
