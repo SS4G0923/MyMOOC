@@ -4,17 +4,22 @@ import com.mymooc.base.model.PageParams;
 import com.mymooc.base.model.PageResult;
 import com.mymooc.content.model.dto.QueryCourseParamsDto;
 import com.mymooc.content.model.po.CourseBase;
+import com.mymooc.content.service.CourseBaseInfoService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class CourseBaseInfoController {
+    @Autowired
+    CourseBaseInfoService courseBaseInfoService;
+    @PostMapping("/course/list")
+    public PageResult<CourseBase> list(PageParams pageParams, @RequestBody(required = false) QueryCourseParamsDto queryCourseParamsDto){
 
-    @RequestMapping("/course/list")
-    public PageResult<CourseBase> list(PageParams pageParams, @RequestBody QueryCourseParamsDto queryCourseParamsDto){
+        PageResult<CourseBase> pageResult = courseBaseInfoService.queryCourseBaseList(pageParams, queryCourseParamsDto);
 
-
-        return null;
+        return pageResult;
     }
 }
