@@ -9,8 +9,6 @@
 		<relativePath>../MyMOOC-parent</relativePath>
 	</parent>
 	<artifactId>MyMOOC-system</artifactId>
-	<name>MyMOOC-system</name>
-	<description>MyMOOC-system</description>
 	<packaging>pom</packaging>
 
 	<modules>
