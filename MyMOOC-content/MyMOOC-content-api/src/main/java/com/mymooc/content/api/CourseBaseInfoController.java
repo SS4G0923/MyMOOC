@@ -2,6 +2,8 @@ package com.mymooc.content.api;
 
 import com.mymooc.base.model.PageParams;
 import com.mymooc.base.model.PageResult;
+import com.mymooc.content.model.dto.AddCourseDto;
+import com.mymooc.content.model.dto.CourseBaseInfoDto;
 import com.mymooc.content.model.dto.QueryCourseParamsDto;
 import com.mymooc.content.model.po.CourseBase;
 import com.mymooc.content.service.CourseBaseInfoService;
@@ -21,5 +23,12 @@ public class CourseBaseInfoController {
         PageResult<CourseBase> pageResult = courseBaseInfoService.queryCourseBaseList(pageParams, queryCourseParamsDto);
 
         return pageResult;
+    }
+
+    @PostMapping("/content/course")
+    public CourseBaseInfoDto createCourseBase(@RequestBody AddCourseDto addCourseDto){
+
+
+        return null;
     }
 }
