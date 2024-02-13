@@ -75,7 +75,8 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         CourseMarket courseMarket = courseMarketMapper.selectById(courseId);
         CourseBaseInfoDto courseBaseInfoDto = new CourseBaseInfoDto();
         BeanUtils.copyProperties(courseBase, courseBaseInfoDto);
-        BeanUtils.copyProperties(courseMarket, courseBaseInfoDto);
+        if(courseMarket != null)
+            BeanUtils.copyProperties(courseMarket, courseBaseInfoDto);
 
         return courseBaseInfoDto;
 
