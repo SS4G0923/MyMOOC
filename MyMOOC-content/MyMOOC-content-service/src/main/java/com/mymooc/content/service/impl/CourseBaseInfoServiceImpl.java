@@ -2,12 +2,14 @@ package com.mymooc.content.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mymooc.base.exception.MyMoocException;
 import com.mymooc.base.model.PageParams;
 import com.mymooc.base.model.PageResult;
 import com.mymooc.content.mapper.CourseBaseMapper;
 import com.mymooc.content.mapper.CourseMarketMapper;
 import com.mymooc.content.model.dto.AddCourseDto;
 import com.mymooc.content.model.dto.CourseBaseInfoDto;
+import com.mymooc.content.model.dto.EditCourseDto;
 import com.mymooc.content.model.dto.QueryCourseParamsDto;
 import com.mymooc.content.model.po.CourseBase;
 import com.mymooc.content.model.po.CourseMarket;
@@ -67,8 +69,8 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
 
         return getCourseBaseInfo(courseBean.getId());
     }
-
-    public CourseBaseInfoDto getCourseBaseInfo(long courseId){
+    @Override
+    public CourseBaseInfoDto getCourseBaseInfo(Long courseId){
         CourseBase courseBase = courseBaseMapper.selectById(courseId);
         if(courseBase == null) return null;
 
@@ -81,6 +83,26 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         return courseBaseInfoDto;
 
     }
+
+    @Override
+    public CourseBaseInfoDto updateCourseBase(Long companyId, EditCourseDto editCourseDto) {
+
+        Long courseId = editCourseDto.getCourseId();
+        CourseBase courseBase = courseBaseMapper.selectById(courseId);
+        if(courseBase == null) MyMoocException.cast("Course Not Found");
+
+        if(!companyId.equals(courseBase.getCompanyId())) MyMoocException.cast("You are not allowed to modify this course");
+
+        BeanUtils.copyProperties(editCourseDto, courseBase);
+        courseBase.setChangeDate(LocalDateTime.now());
+
+        int i = courseBaseMapper.updateById(courseBase);
+        if(i <= 0) MyMoocException.cast("Update Course Base Info FAILED");
+
+        CourseBaseInfoDto courseBaseInfo = getCourseBaseInfo(courseId);
+        return courseBaseInfo;
+    }
+
     private int saveCourseMarket(CourseMarket courseMarket){
         String charge = courseMarket.getCharge();
         if(StringUtils.isEmpty(charge)){
