@@ -1,7 +1,10 @@
 package com.mymooc.content.mapper;
 
+import com.mymooc.content.model.dto.TeachPlanDto;
 import com.mymooc.content.model.po.Teachplan;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+
+import java.util.List;
 
 /**
  * <p>
@@ -12,4 +15,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface TeachplanMapper extends BaseMapper<Teachplan> {
 
+    public List<TeachPlanDto> selectTreeNodes(Long courseId);
 }
