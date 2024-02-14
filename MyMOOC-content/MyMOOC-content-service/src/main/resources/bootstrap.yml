@@ -2,11 +2,23 @@
 spring:
   application:
     name: content-service
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/MyMOOC?serverTimezone=UTC&userUnicode=true&useSSL=false&allowPublicKeyRetrieval=true
-    username: root
-    password: 20030312
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://localhost:3306/MyMOOC?serverTimezone=UTC&userUnicode=true&useSSL=false&allowPublicKeyRetrieval=true
+#    username: root
+#    password: 20030312
+  cloud:
+    nacos:
+      server-addr: localhost:8848
+      discovery:
+        namespace: dev
+        group: mymooc-project
+        secret-key: VGhpc0lzTXlDdXN0b21TZWNyZXRLZXkwMTIzNDU2Nzg=
+      config:
+        namespace: dev
+        group: mymooc-project
+        file-extension: yaml
+        refresh-enabled: true
 # 日志文件配置路径
 logging:
   config: classpath:log4j2-dev.xml
