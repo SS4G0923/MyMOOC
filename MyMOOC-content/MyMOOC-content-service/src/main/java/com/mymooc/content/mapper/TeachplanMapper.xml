@@ -51,6 +51,7 @@
             <result column="two_orderby" property="orderby" />
             <result column="two_courseId" property="courseId" />
             <result column="two_coursePubId" property="coursePubId" />
+            <result column="two_isPreview" property="isPreview" />
             <association property="teachplanMedia" javaType="com.mymooc.content.model.po.TeachplanMedia">
                 <result column="teachplanMeidaId" property="id" />
                 <result column="mediaFilename" property="mediaFilename" />
@@ -89,7 +90,7 @@
             m1.id teachplanMeidaId,
             m1.media_id mediaId
         from teachplan one
-                 INNER JOIN teachplan two on one.id = two.parentid
+                 LEFT JOIN teachplan two on one.id = two.parentid
                  LEFT JOIN teachplan_media m1 on m1.teachplan_id = two.id
         where one.parentid = 0 and one.course_id=#{value}
         order by one.orderby, two.orderby
