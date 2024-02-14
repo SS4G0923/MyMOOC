@@ -23,18 +23,17 @@ spring:
         group: mymooc-project
         file-extension: yaml
         refresh-enabled: true
-
+        extension-configs:
+          - data-id: content-service-${spring.profiles.active}.yaml
+            group: mymooc-project
+            refresh: true
+        shared-configs:
+          - data-id: swagger-${spring.profiles.active}.yaml
+            group: mymooc-common
+            refresh: true
+          - data-id: logging-${spring.profiles.active}.yaml
+            group: mymooc-common
+            refresh: true
 
   profiles:
     active: dev
-
-# 日志文件配置路径
-logging:
-  config: classpath:log4j2-dev.xml
-
-swagger:
-  title: "MyMOOC"
-  description: "MyMOOC Content"
-  base-package: com.mymooc.content
-  enabled: true
-  version: 1.0.0
