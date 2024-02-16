@@ -3,6 +3,8 @@ package com.mymooc.media.service;
 import com.mymooc.base.model.PageParams;
 import com.mymooc.base.model.PageResult;
 import com.mymooc.media.model.dto.QueryMediaParamsDto;
+import com.mymooc.media.model.dto.UploadFileParamsDto;
+import com.mymooc.media.model.dto.UploadFileResultDto;
 import com.mymooc.media.model.po.MediaFiles;
 
 /**
@@ -23,5 +25,6 @@ public interface MediaFileService {
  */
  public PageResult<MediaFiles> queryMediaFiels(Long companyId,PageParams pageParams, QueryMediaParamsDto queryMediaParamsDto);
 
+ public UploadFileResultDto uploadFile(Long companyId, UploadFileParamsDto uploadFileParamsDto, String localFilePath);
 
 }
