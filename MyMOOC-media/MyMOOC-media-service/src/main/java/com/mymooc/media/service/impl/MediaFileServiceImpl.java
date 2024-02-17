@@ -41,6 +41,9 @@ public class MediaFileServiceImpl implements MediaFileService {
     @Autowired
     MinioClient minioClient;
 
+    @Autowired
+    MediaFileService currentProxy;
+
     //普通文件桶
     @Value("${minio.bucket.files}")
     private String bucket_files;
@@ -156,7 +159,7 @@ public class MediaFileServiceImpl implements MediaFileService {
         return mediaFiles;
 
     }
-    @Transactional
+
     @Override
     public UploadFileResultDto uploadFile(Long companyId, UploadFileParamsDto uploadFileParamsDto, String localFilePath) {
         File file = new File(localFilePath);
@@ -178,7 +181,7 @@ public class MediaFileServiceImpl implements MediaFileService {
         //将文件上传到minio
         boolean b = addMediaFilesToMinIO(localFilePath, mimeType, bucket_files, objectName);
         //将文件信息存储到数据库
-        MediaFiles mediaFiles = addMediaFilesToDb(companyId, fileMd5, uploadFileParamsDto, bucket_files, objectName);
+        MediaFiles mediaFiles = currentProxy.addMediaFilesToDb(companyId, fileMd5, uploadFileParamsDto, bucket_files, objectName);
         if(mediaFiles == null){
             MyMoocException.cast("保存文件信息失败");
         }
