@@ -2,6 +2,7 @@ package com.mymooc.media.service;
 
 import com.mymooc.base.model.PageParams;
 import com.mymooc.base.model.PageResult;
+import com.mymooc.base.model.RestResponse;
 import com.mymooc.media.model.dto.QueryMediaParamsDto;
 import com.mymooc.media.model.dto.UploadFileParamsDto;
 import com.mymooc.media.model.dto.UploadFileResultDto;
@@ -29,4 +30,7 @@ public interface MediaFileService {
 
  public MediaFiles addMediaFilesToDb(Long companyId,String fileMd5,UploadFileParamsDto uploadFileParamsDto,String bucket,String objectName);
 
+ public RestResponse<Boolean> checkFile(String fileMd5);
+
+ public RestResponse<Boolean> checkChunk(String fileMd5, int chunkIndex);
 }

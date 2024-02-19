@@ -7,12 +7,15 @@ import com.j256.simplemagic.ContentInfoUtil;
 import com.mymooc.base.exception.MyMoocException;
 import com.mymooc.base.model.PageParams;
 import com.mymooc.base.model.PageResult;
+import com.mymooc.base.model.RestResponse;
 import com.mymooc.media.mapper.MediaFilesMapper;
 import com.mymooc.media.model.dto.QueryMediaParamsDto;
 import com.mymooc.media.model.dto.UploadFileParamsDto;
 import com.mymooc.media.model.dto.UploadFileResultDto;
 import com.mymooc.media.model.po.MediaFiles;
 import com.mymooc.media.service.MediaFileService;
+import io.minio.GetObjectArgs;
+import io.minio.GetObjectResponse;
 import io.minio.MinioClient;
 import io.minio.UploadObjectArgs;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +50,9 @@ public class MediaFileServiceImpl implements MediaFileService {
     //普通文件桶
     @Value("${minio.bucket.files}")
     private String bucket_files;
+
+    @Value("${minio.bucket.videofiles}")
+    private String bucket_videos;
 
     @Override
     public PageResult<MediaFiles> queryMediaFiels(Long companyId,PageParams pageParams, QueryMediaParamsDto queryMediaParamsDto) {
@@ -190,5 +196,53 @@ public class MediaFileServiceImpl implements MediaFileService {
         BeanUtils.copyProperties(mediaFiles, uploadFileResultDto);
         return uploadFileResultDto;
 
+    }
+
+    @Override
+    public RestResponse<Boolean> checkFile(String fileMd5) {
+
+        MediaFiles mediaFiles = mediaFilesMapper.selectById(fileMd5);
+
+        if (mediaFiles != null) {
+
+            GetObjectArgs build = GetObjectArgs.builder().bucket(mediaFiles.getBucket()).object(mediaFiles.getFilePath()).build();
+            try {
+                GetObjectResponse object = minioClient.getObject(build);
+                if (object != null) {
+                    return RestResponse.success(true);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        return RestResponse.success(false);
+    }
+
+    @Override
+    public RestResponse<Boolean> checkChunk(String fileMd5, int chunkIndex) {
+
+        String chunkFileFolderPath = getChunkFileFolderPath(fileMd5);
+
+        GetObjectArgs build = GetObjectArgs.builder()
+                .bucket(bucket_videos)
+                .object(chunkFileFolderPath + chunkIndex)
+                .build();
+
+        try {
+            GetObjectResponse object = minioClient.getObject(build);
+            if(object != null){
+                return RestResponse.success(true);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return RestResponse.success(false);
+    }
+
+    private String getChunkFileFolderPath(String fileMd5){
+        return fileMd5.substring(0, 1) + "/" + fileMd5.substring(1, 2) + "/" + fileMd5 +  "/" + "chunk" + "/";
     }
 }
