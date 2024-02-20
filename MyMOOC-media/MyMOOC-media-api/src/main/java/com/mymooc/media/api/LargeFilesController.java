@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+
 
 @RestController
 public class LargeFilesController {
@@ -34,8 +36,11 @@ public class LargeFilesController {
 	public RestResponse uploadchunk(@RequestParam("file") MultipartFile file,
 									@RequestParam("fileMd5") String fileMd5,
 									@RequestParam("chunk") int chunk) throws Exception {
+		File tempFile = File.createTempFile("minio", ".temp");
+		file.transferTo(tempFile);
+		String localFilePath = tempFile.getAbsolutePath();
 
-		return null;
+		return mediaFileService.uploadChunk(fileMd5, chunk, localFilePath);
 	}
 
 	@PostMapping("/upload/mergechunks")
