@@ -14,12 +14,11 @@ import com.mymooc.media.model.dto.UploadFileParamsDto;
 import com.mymooc.media.model.dto.UploadFileResultDto;
 import com.mymooc.media.model.po.MediaFiles;
 import com.mymooc.media.service.MediaFileService;
-import io.minio.GetObjectArgs;
-import io.minio.GetObjectResponse;
-import io.minio.MinioClient;
-import io.minio.UploadObjectArgs;
+import io.minio.*;
+import io.minio.errors.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,12 +26,16 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.*;
+import java.nio.file.Files;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -255,7 +258,80 @@ public class MediaFileServiceImpl implements MediaFileService {
         return RestResponse.success(true);
     }
 
+    @Override
+    public RestResponse mergeChunks(Long companyId, String fileMd5, int chunkTotal, UploadFileParamsDto uploadFileParamsDto) {
+
+        List<ComposeSource> sources = Stream.iterate(0, i -> ++i).limit(chunkTotal).map(i -> ComposeSource.builder().bucket(bucket_videos).object(getChunkFileFolderPath(fileMd5) + i).build()).collect(Collectors.toList());
+
+        String object = getFilePathByMd5(fileMd5, uploadFileParamsDto.getFilename().substring(uploadFileParamsDto.getFilename().lastIndexOf(".")));
+        ComposeObjectArgs composeObjectArgs = ComposeObjectArgs.builder()
+                .bucket(bucket_videos)
+                .object(object)
+                .sources(sources)
+                .build();
+
+		try {
+			minioClient.composeObject(composeObjectArgs);
+		} catch (Exception e) {
+            log.error("合并分块失败, bucket: {}, error message: {}", bucket_videos, e.getMessage());
+            return RestResponse.validfail(false, "合并分块失败");
+        }
+
+        File file = downloadFileFromMinio(bucket_videos, object);
+        try {
+            String md5Hex = DigestUtils.md5Hex(Files.newInputStream(file.toPath()));
+            if(!fileMd5.equals(md5Hex)){
+                log.error("文件校验失败, fileMd5: {}, md5Hex: {}", fileMd5, md5Hex);
+                return RestResponse.validfail(false, "文件校验失败");
+            }
+        } catch(Exception e) {
+            log.error("文件校验失败, error message: {}", e.getMessage());
+            return RestResponse.validfail(false, "文件校验失败");
+        }
+
+        MediaFiles mediaFiles = currentProxy.addMediaFilesToDb(companyId, fileMd5, uploadFileParamsDto, bucket_videos, object);
+
+        if(mediaFiles == null){
+            return RestResponse.validfail(false, "保存文件信息失败");
+        }
+
+        cleanChunkFiles(getChunkFileFolderPath(fileMd5), chunkTotal);
+
+        return RestResponse.success(true);
+    }
+
+    public File downloadFileFromMinio(String bucket, String objectName){
+        File minioFile = null;
+        FileOutputStream outputStream = null;
+        try {
+            InputStream stream = minioClient.getObject(GetObjectArgs.builder().bucket(bucket).object(objectName).build());
+            minioFile = File.createTempFile("minio", ".merge");
+            outputStream = new FileOutputStream(minioFile);
+            IOUtils.copy(stream, outputStream);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if(outputStream != null){
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+        return null;
+    }
+
+    private String getFilePathByMd5(String fileMd5, String fileExt){
+        return fileMd5.substring(0, 1) + "/" + fileMd5.substring(1, 2) + "/" + fileMd5 + "/" + fileMd5 + fileExt;
+    }
+
     private String getChunkFileFolderPath(String fileMd5){
         return fileMd5.substring(0, 1) + "/" + fileMd5.substring(1, 2) + "/" + fileMd5 +  "/" + "chunk" + "/";
+    }
+
+    private void cleanChunkFiles(String chunkFileFolderPath, int chunkTotal){
+
     }
 }
