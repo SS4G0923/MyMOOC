@@ -242,6 +242,19 @@ public class MediaFileServiceImpl implements MediaFileService {
         return RestResponse.success(false);
     }
 
+    @Override
+    public RestResponse uploadChunk(String fileMd5, int chunk, String localChunkFilePath) {
+
+        String mimeType = getMimeType(null);
+
+        boolean b = addMediaFilesToMinIO(localChunkFilePath, mimeType, bucket_videos, getChunkFileFolderPath(fileMd5) + chunk);
+        if(!b){
+            return RestResponse.validfail(false, "上传分块失败");
+        }
+
+        return RestResponse.success(true);
+    }
+
     private String getChunkFileFolderPath(String fileMd5){
         return fileMd5.substring(0, 1) + "/" + fileMd5.substring(1, 2) + "/" + fileMd5 +  "/" + "chunk" + "/";
     }

@@ -33,4 +33,6 @@ public interface MediaFileService {
  public RestResponse<Boolean> checkFile(String fileMd5);
 
  public RestResponse<Boolean> checkChunk(String fileMd5, int chunkIndex);
+
+ public RestResponse uploadChunk(String fileMd5, int chunk, String localChunkFilePath);
 }
