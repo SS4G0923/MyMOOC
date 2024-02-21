@@ -16,6 +16,8 @@ import com.mymooc.media.model.po.MediaFiles;
 import com.mymooc.media.service.MediaFileService;
 import io.minio.*;
 import io.minio.errors.*;
+import io.minio.messages.DeleteError;
+import io.minio.messages.DeleteObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -279,11 +281,14 @@ public class MediaFileServiceImpl implements MediaFileService {
 
         File file = downloadFileFromMinio(bucket_videos, object);
         try {
+
             String md5Hex = DigestUtils.md5Hex(Files.newInputStream(file.toPath()));
             if(!fileMd5.equals(md5Hex)){
                 log.error("文件校验失败, fileMd5: {}, md5Hex: {}", fileMd5, md5Hex);
                 return RestResponse.validfail(false, "文件校验失败");
             }
+
+            uploadFileParamsDto.setFileSize(String.valueOf(file.length()));
         } catch(Exception e) {
             log.error("文件校验失败, error message: {}", e.getMessage());
             return RestResponse.validfail(false, "文件校验失败");
@@ -308,6 +313,7 @@ public class MediaFileServiceImpl implements MediaFileService {
             minioFile = File.createTempFile("minio", ".merge");
             outputStream = new FileOutputStream(minioFile);
             IOUtils.copy(stream, outputStream);
+            return minioFile;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -332,6 +338,17 @@ public class MediaFileServiceImpl implements MediaFileService {
     }
 
     private void cleanChunkFiles(String chunkFileFolderPath, int chunkTotal){
+
+        Iterable<DeleteObject> objects = Stream.iterate(0, i -> ++i).limit(chunkTotal).map(i -> new DeleteObject(chunkFileFolderPath + i)).collect(Collectors.toList());
+        RemoveObjectsArgs build = RemoveObjectsArgs.builder().bucket(bucket_videos).objects(objects).build();
+        Iterable<Result<DeleteError>> results = minioClient.removeObjects(build);
+        results.forEach(f -> {
+			try {
+				f.get();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
 
     }
 }
