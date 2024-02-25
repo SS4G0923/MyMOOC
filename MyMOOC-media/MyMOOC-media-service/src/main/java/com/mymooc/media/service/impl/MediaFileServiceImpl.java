@@ -9,10 +9,12 @@ import com.mymooc.base.model.PageParams;
 import com.mymooc.base.model.PageResult;
 import com.mymooc.base.model.RestResponse;
 import com.mymooc.media.mapper.MediaFilesMapper;
+import com.mymooc.media.mapper.MediaProcessMapper;
 import com.mymooc.media.model.dto.QueryMediaParamsDto;
 import com.mymooc.media.model.dto.UploadFileParamsDto;
 import com.mymooc.media.model.dto.UploadFileResultDto;
 import com.mymooc.media.model.po.MediaFiles;
+import com.mymooc.media.model.po.MediaProcess;
 import com.mymooc.media.service.MediaFileService;
 import io.minio.*;
 import io.minio.errors.*;
@@ -51,6 +53,9 @@ public class MediaFileServiceImpl implements MediaFileService {
 
     @Autowired
     MediaFileService currentProxy;
+
+    @Autowired
+    MediaProcessMapper mediaProcessMapper;
 
     //普通文件桶
     @Value("${minio.bucket.files}")
@@ -163,12 +168,38 @@ public class MediaFileServiceImpl implements MediaFileService {
             if (insert < 0) {
                 log.error("保存文件信息到数据库失败,{}",mediaFiles.toString());
                 MyMoocException.cast("保存文件信息失败");
+                return null;
             }
             log.debug("保存文件信息到数据库成功,{}",mediaFiles.toString());
 
         }
+
+        addWaitingTask(mediaFiles);
+        log.debug("保存文件待处理信息到数据库成功");
+
+
         return mediaFiles;
 
+    }
+
+    private void addWaitingTask(MediaFiles mediaFiles){
+        //文件名称
+        String filename = mediaFiles.getFilename();
+        //文件扩展名
+        String extension = filename.substring(filename.lastIndexOf("."));
+        //文件mimeType
+        String mimeType = getMimeType(extension);
+        //如果是avi视频添加到视频待处理表
+        if(mimeType.equals("video/x-msvideo")){
+            MediaProcess mediaProcess = new MediaProcess();
+
+            BeanUtils.copyProperties(mediaFiles,mediaProcess);
+            mediaProcess.setStatus("1");//未处理
+            mediaProcess.setFailCount(0);//失败次数默认为0
+            mediaProcess.setCreateDate(LocalDateTime.now());
+
+            mediaProcessMapper.insert(mediaProcess);
+        }
     }
 
     @Override
