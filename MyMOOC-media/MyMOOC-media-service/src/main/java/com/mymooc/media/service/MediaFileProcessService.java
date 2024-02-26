@@ -7,4 +7,6 @@ import java.util.List;
 public interface MediaFileProcessService {
 
 	public List<MediaProcess> getMediaProcessList(int shardTotal, int shardIndex, int count);
+
+	public boolean startTask(long id);
 }
