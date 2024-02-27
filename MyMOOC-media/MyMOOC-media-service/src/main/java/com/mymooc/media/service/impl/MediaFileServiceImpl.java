@@ -336,6 +336,7 @@ public class MediaFileServiceImpl implements MediaFileService {
         return RestResponse.success(true);
     }
 
+    @Override
     public File downloadFileFromMinio(String bucket, String objectName){
         File minioFile = null;
         FileOutputStream outputStream = null;
