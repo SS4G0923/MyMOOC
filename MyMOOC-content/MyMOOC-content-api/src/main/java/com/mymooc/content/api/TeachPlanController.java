@@ -1,5 +1,6 @@
 package com.mymooc.content.api;
 
+import com.mymooc.content.model.dto.BindTeachplanMediaDto;
 import com.mymooc.content.model.dto.SaveTeachPlanDto;
 import com.mymooc.content.model.dto.TeachPlanDto;
 import com.mymooc.content.service.TeachPlanService;
@@ -23,4 +24,10 @@ public class TeachPlanController {
     public void saveTeachplan(@RequestBody SaveTeachPlanDto saveTeachPlanDto){
         teachPlanService.saveTeachPlan(saveTeachPlanDto);
     }
+
+    @PostMapping("/teachplan/association/media")
+    public void associationMedia(@RequestBody BindTeachplanMediaDto bindTeachplanMediaDto){
+        teachPlanService.associationMedia(bindTeachplanMediaDto);
+    }
+
 }
