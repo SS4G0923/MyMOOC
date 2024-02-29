@@ -34,6 +34,9 @@ spring:
           - data-id: logging-${spring.profiles.active}.yaml
             group: mymooc-common
             refresh: true
+          - data-id: freemarker-config-dev.yaml
+            group: mymooc-common
+            refresh: true
 
   profiles:
     active: dev
