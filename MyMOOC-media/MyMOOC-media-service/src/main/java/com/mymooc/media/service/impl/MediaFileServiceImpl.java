@@ -361,6 +361,11 @@ public class MediaFileServiceImpl implements MediaFileService {
         return null;
     }
 
+    @Override
+    public MediaFiles getFileById(String mediaId){
+        return mediaFilesMapper.selectById(mediaId);
+    }
+
     private String getFilePathByMd5(String fileMd5, String fileExt){
         return fileMd5.substring(0, 1) + "/" + fileMd5.substring(1, 2) + "/" + fileMd5 + "/" + fileMd5 + fileExt;
     }
