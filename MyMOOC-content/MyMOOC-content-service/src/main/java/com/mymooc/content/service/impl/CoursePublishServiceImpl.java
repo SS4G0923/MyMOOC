@@ -4,12 +4,14 @@ import com.alibaba.fastjson.JSON;
 import com.mymooc.base.exception.MyMoocException;
 import com.mymooc.content.mapper.CourseBaseMapper;
 import com.mymooc.content.mapper.CourseMarketMapper;
+import com.mymooc.content.mapper.CoursePublishMapper;
 import com.mymooc.content.mapper.CoursePublishPreMapper;
 import com.mymooc.content.model.dto.CourseBaseInfoDto;
 import com.mymooc.content.model.dto.CoursePreviewDto;
 import com.mymooc.content.model.dto.TeachPlanDto;
 import com.mymooc.content.model.po.CourseBase;
 import com.mymooc.content.model.po.CourseMarket;
+import com.mymooc.content.model.po.CoursePublish;
 import com.mymooc.content.model.po.CoursePublishPre;
 import com.mymooc.content.service.CourseBaseInfoService;
 import com.mymooc.content.service.CoursePublishService;
@@ -40,6 +42,10 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 
 	@Autowired
 	CourseBaseMapper courseBaseMapper;
+
+	@Autowired
+	CoursePublishMapper coursePublishMapper;
+
 
 	@Override
 	public CoursePreviewDto getCoursePreviewInfo(Long courseId) {
@@ -96,5 +102,30 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 		CourseBase courseBase = courseBaseMapper.selectById(courseId);
 		courseBase.setStatus("202003");
 		courseBaseMapper.updateById(courseBase);
+	}
+
+	@Override
+	public void publish(Long companyId, Long courseId){
+
+		CoursePublishPre coursePublishPre = coursePublishPreMapper.selectById(courseId);
+		if(coursePublishPre == null)
+			MyMoocException.cast("Course not committed for audit");
+
+		if(!coursePublishPre.getStatus().equals("202004"))
+			MyMoocException.cast("Course did not pass audit");
+
+		CoursePublish coursePublish = new CoursePublish();
+		BeanUtils.copyProperties(coursePublishPre, coursePublish);
+
+		CoursePublish coursePublish1 = coursePublishMapper.selectById(courseId);
+		if(coursePublish1 == null)
+			coursePublishMapper.insert(coursePublish);
+		else
+			coursePublishMapper.updateById(coursePublish);
+
+
+
+		coursePublishPreMapper.deleteById(courseId);
+
 	}
 }
