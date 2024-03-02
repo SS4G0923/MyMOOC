@@ -6,12 +6,14 @@ import com.mymooc.base.exception.MyMoocException;
 import com.mymooc.base.model.PageParams;
 import com.mymooc.base.model.PageResult;
 import com.mymooc.content.mapper.CourseBaseMapper;
+import com.mymooc.content.mapper.CourseCategoryMapper;
 import com.mymooc.content.mapper.CourseMarketMapper;
 import com.mymooc.content.model.dto.AddCourseDto;
 import com.mymooc.content.model.dto.CourseBaseInfoDto;
 import com.mymooc.content.model.dto.EditCourseDto;
 import com.mymooc.content.model.dto.QueryCourseParamsDto;
 import com.mymooc.content.model.po.CourseBase;
+import com.mymooc.content.model.po.CourseCategory;
 import com.mymooc.content.model.po.CourseMarket;
 import com.mymooc.content.service.CourseBaseInfoService;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +33,8 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
     CourseBaseMapper courseBaseMapper;
     @Autowired
     CourseMarketMapper courseMarketMapper;
+    @Autowired
+    CourseCategoryMapper courseCategoryMapper;
     @Override
     public PageResult<CourseBase> queryCourseBaseList(PageParams pageParams, QueryCourseParamsDto courseParamsDto) {
 
@@ -79,6 +83,13 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         BeanUtils.copyProperties(courseBase, courseBaseInfoDto);
         if(courseMarket != null)
             BeanUtils.copyProperties(courseMarket, courseBaseInfoDto);
+
+        CourseCategory mtObj = courseCategoryMapper.selectById(courseBase.getMt());
+        String mtName = mtObj.getName();
+        courseBaseInfoDto.setMtName(mtName);
+        CourseCategory stObj = courseCategoryMapper.selectById(courseBase.getSt());
+        String stName = stObj.getName();
+        courseBaseInfoDto.setMtName(stName);
 
         return courseBaseInfoDto;
 
