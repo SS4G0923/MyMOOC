@@ -19,6 +19,11 @@ spring:
         group: mymooc-project
         file-extension: yaml
         refresh-enabled: true
+        shared-configs:
+          - data-id: feign-${spring.profiles.active}.yaml
+            group: xuecheng-plus-common
+            refresh: true
+
 # 日志文件配置路径
 logging:
   config: classpath:log4j2-dev.xml
