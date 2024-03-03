@@ -1,6 +1,7 @@
 package com.mymooc.content.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.mymooc.base.exception.CommonError;
 import com.mymooc.base.exception.MyMoocException;
 import com.mymooc.content.mapper.CourseBaseMapper;
 import com.mymooc.content.mapper.CourseMarketMapper;
@@ -16,6 +17,8 @@ import com.mymooc.content.model.po.CoursePublishPre;
 import com.mymooc.content.service.CourseBaseInfoService;
 import com.mymooc.content.service.CoursePublishService;
 import com.mymooc.content.service.TeachPlanService;
+import com.mymooc.messagesdk.model.po.MqMessage;
+import com.mymooc.messagesdk.service.MqMessageService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +48,9 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 
 	@Autowired
 	CoursePublishMapper coursePublishMapper;
+
+	@Autowired
+	MqMessageService mqMessageService;
 
 
 	@Override
@@ -123,9 +129,17 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 		else
 			coursePublishMapper.updateById(coursePublish);
 
-
+		saveCoursePublishMessage(courseId);
 
 		coursePublishPreMapper.deleteById(courseId);
 
 	}
+
+	private void saveCoursePublishMessage(Long courseId){
+		MqMessage mqMessage = mqMessageService.addMessage("course_publish", String.valueOf(courseId), null, null);
+		if(mqMessage==null){
+			MyMoocException.cast(CommonError.UNKOWN_ERROR);
+		}
+	}
+
 }
