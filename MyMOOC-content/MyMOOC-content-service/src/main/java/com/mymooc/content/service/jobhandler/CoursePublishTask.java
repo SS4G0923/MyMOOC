@@ -1,18 +1,25 @@
 package com.mymooc.content.service.jobhandler;
 
+import com.mymooc.base.exception.MyMoocException;
+import com.mymooc.content.service.CoursePublishService;
 import com.mymooc.messagesdk.model.po.MqMessage;
 import com.mymooc.messagesdk.service.MessageProcessAbstract;
 import com.mymooc.messagesdk.service.MqMessageService;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
 public class CoursePublishTask extends MessageProcessAbstract {
+
+	@Autowired
+	CoursePublishService coursePublishService;
 
 	@XxlJob("CoursePublishJobHandler")
 	public void coursePublishJobHandler() throws Exception{
@@ -54,12 +61,14 @@ public class CoursePublishTask extends MessageProcessAbstract {
 			log.debug("课程静态化已处理直接返回，课程id:{}",courseId);
 			return ;
 		}
+
 		//开始课程静态化
-		try {
-			TimeUnit.SECONDS.sleep(10);
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}
+		File file = coursePublishService.generateCourseHtml(courseId);
+		if(file == null)
+			MyMoocException.cast("生成的静态页面为空");
+
+		coursePublishService.uploadCourseHtml(courseId, file);
+
 		//任务处理完成，保存第一阶段状态
 		mqMessageService.completedStageOne(id);
 
